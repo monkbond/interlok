@@ -84,6 +84,7 @@ public class MultiPayloadMessageMimeEncoder extends MimeEncoderImpl<OutputStream
       }
       writeNextServiceId(output, msg);
       output.writeTo(target);
+      target.flush();
     } catch (Exception e) {
       throw ExceptionHelper.wrapCoreException(e);
     }
@@ -101,11 +102,15 @@ public class MultiPayloadMessageMimeEncoder extends MimeEncoderImpl<OutputStream
   @Override
   public AdaptrisMessage readMessage(InputStream source) throws CoreException {
     try {
-      MultiPayloadAdaptrisMessage message = (MultiPayloadAdaptrisMessage) currentMessageFactory().newMessage();
-      message.deletePayload(MultiPayloadAdaptrisMessage.DEFAULT_PAYLOAD_ID); // Delete the default payload
       BodyPartIterator input = new BodyPartIterator(source);
-      addPartsToMessage(input, message);
-      return message;
+      AdaptrisMessage msg = currentMessageFactory().newMessage();
+      if (msg instanceof MultiPayloadAdaptrisMessage message) {
+        message.deletePayload(MultiPayloadAdaptrisMessage.DEFAULT_PAYLOAD_ID); // Delete the default payload
+        addPartsToMessage(input, message);
+      } else {
+        addPartsToMessage(input, msg);
+      }
+      return msg;
     } catch (Exception e) {
       throw ExceptionHelper.wrapCoreException(e);
     }
@@ -120,7 +125,11 @@ public class MultiPayloadMessageMimeEncoder extends MimeEncoderImpl<OutputStream
       }
       if (id.length() > PAYLOAD_CONTENT_ID.length() + 1) {
         id = id.substring(PAYLOAD_CONTENT_ID.length() + 1);
-        message.switchPayload(id);
+        if (message.hasPayloadId(id)) {          
+          message.switchPayload(id);
+        } else {
+          message.addPayload(id, new byte[0]);
+        }
       }
       try (InputStream payloadIn = payloadPart.getInputStream(); OutputStream out = message.getOutputStream()) {
         IOUtils.copy(payloadIn, out);
