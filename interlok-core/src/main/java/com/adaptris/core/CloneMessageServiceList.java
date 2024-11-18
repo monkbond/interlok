@@ -16,20 +16,25 @@
 
 package com.adaptris.core;
 
-import static com.adaptris.core.util.LoggingHelper.friendlyName;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.stream.Collectors;
-import javax.validation.Valid;
-import org.apache.commons.lang3.ObjectUtils;
 import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.core.metadata.MetadataFilter;
 import com.adaptris.core.metadata.RemoveAllMetadataFilter;
+import com.adaptris.core.util.MessageHelper;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import lombok.Getter;
+import lombok.Setter;
+import org.apache.commons.lang3.ObjectUtils;
+
+import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.stream.Collectors;
+
+import static com.adaptris.core.util.LoggingHelper.friendlyName;
 
 /**
  * Implementation of {@linkplain ServiceCollection} that creates a new clone of {@linkplain com.adaptris.core.AdaptrisMessage} for each configured
@@ -61,6 +66,10 @@ public class CloneMessageServiceList extends ServiceListBase {
   @Valid
   private MetadataFilter overrideMetadataFilter;
 
+  @Getter
+  @Setter
+  private boolean newUniqueIdPerMessage = false;
+
   public CloneMessageServiceList() {
     super();
   }
@@ -74,12 +83,21 @@ public class CloneMessageServiceList extends ServiceListBase {
     this(Arrays.asList(list));
   }
 
+  private AdaptrisMessage cloneMessage(AdaptrisMessage msg) throws CloneNotSupportedException{
+    AdaptrisMessage clonedMessage = (AdaptrisMessage) msg.clone();
+    if (newUniqueIdPerMessage) {
+      String newUniqueId = MessageHelper.generateNewMessageUniqueId(clonedMessage);
+      clonedMessage.setUniqueId(newUniqueId);
+    }
+    return clonedMessage;
+  }
+
   @Override
   protected void applyServices(AdaptrisMessage msg) throws ServiceException {
     for (Service service : getServices()) {
       if(service.enabled()) {
         try {
-          AdaptrisMessage clonedMessage = (AdaptrisMessage) msg.clone();
+          AdaptrisMessage clonedMessage = cloneMessage(msg);
           if (haltProcessing(clonedMessage)) {
             break;
           }
