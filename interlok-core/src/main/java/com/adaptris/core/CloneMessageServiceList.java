@@ -20,6 +20,7 @@ import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.annotation.DisplayOrder;
+import com.adaptris.annotation.InputFieldDefault;
 import com.adaptris.core.metadata.MetadataFilter;
 import com.adaptris.core.metadata.RemoveAllMetadataFilter;
 import com.adaptris.core.util.MessageHelper;
@@ -66,8 +67,12 @@ public class CloneMessageServiceList extends ServiceListBase {
   @Valid
   private MetadataFilter overrideMetadataFilter;
 
+  /**
+   * If set to true, generates a new unique id per cloned message. Defaults to false.
+   */
   @Getter
   @Setter
+  @InputFieldDefault(value = "false")
   private boolean newUniqueIdPerMessage = false;
 
   public CloneMessageServiceList() {

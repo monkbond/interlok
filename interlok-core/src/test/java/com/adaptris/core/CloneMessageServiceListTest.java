@@ -111,13 +111,15 @@ public class CloneMessageServiceListTest
     try {
       LifecycleHelper.initAndStart(service1);
       service1.doService(msg);
-      assertTrue(messageUniqueIds.size() == 1 && messageUniqueIds.contains(msg.getUniqueId()));
+      assertEquals(1, messageUniqueIds.size());
+      assertTrue(messageUniqueIds.contains(msg.getUniqueId()));
 
       messageUniqueIds.clear();
 
       LifecycleHelper.initAndStart(service2);
       service2.doService(msg);
-      assertTrue(messageUniqueIds.size() == 2 && !messageUniqueIds.contains(msg.getUniqueId()));
+      assertEquals(2, messageUniqueIds.size());
+      assertFalse(messageUniqueIds.contains(msg.getUniqueId()));
 
     }
     finally {

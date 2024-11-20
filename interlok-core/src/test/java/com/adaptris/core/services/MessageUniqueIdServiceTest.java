@@ -19,8 +19,12 @@ package com.adaptris.core.services;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.DefaultMessageFactory;
 import com.adaptris.core.GeneralServiceExample;
+import com.adaptris.core.MetadataElement;
 import org.junit.jupiter.api.Test;
 
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -29,12 +33,44 @@ public class MessageUniqueIdServiceTest extends GeneralServiceExample {
 
 
   @Test
-  public void testService() throws Exception {
+  public void testSettingAndResolvingUniqueId() throws Exception {
+    String MSG_ID = "%message{message-id}";
+    String newUniqueId = UUID.randomUUID().toString();
     AdaptrisMessage msg = new DefaultMessageFactory().newMessage();
+    msg.addMetadata(new MetadataElement("message-id", newUniqueId));
     String originalUniqueId = msg.getUniqueId();
-    execute(new MessageUniqueIdService(), msg);
+    MessageUniqueIdService service = new MessageUniqueIdService();
+    service.setGenerate(false);
+    service.setMessageUniqueId(MSG_ID);
+
+    // test resolving
+    execute(service, msg);
     assertNotNull(msg.getUniqueId());
     assertNotEquals(msg.getUniqueId(), originalUniqueId);
+    assertEquals(msg.getUniqueId(), newUniqueId);
+
+    // test setting
+    newUniqueId = UUID.randomUUID().toString();
+    service.setMessageUniqueId(newUniqueId);
+    execute(service, msg);
+    assertNotNull(msg.getUniqueId());
+    assertNotEquals(msg.getUniqueId(), originalUniqueId);
+    assertEquals(msg.getUniqueId(), newUniqueId);
+
+  }
+
+  @Test
+  public void testGenerateUniqueId() throws Exception {
+    final String MSG_ID = "test";
+    AdaptrisMessage msg = new DefaultMessageFactory().newMessage();
+    String originalUniqueId = msg.getUniqueId();
+    MessageUniqueIdService service = new MessageUniqueIdService();
+    service.setGenerate(true);
+    service.setMessageUniqueId(MSG_ID);
+    execute(service, msg);
+    assertNotNull(msg.getUniqueId());
+    assertNotEquals(msg.getUniqueId(), originalUniqueId);
+    assertNotEquals(msg.getUniqueId(), MSG_ID);
   }
 
   @Override
