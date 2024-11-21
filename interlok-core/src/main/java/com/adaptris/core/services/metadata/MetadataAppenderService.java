@@ -18,6 +18,9 @@ package com.adaptris.core.services.metadata;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import com.adaptris.annotation.AdapterComponent;
@@ -30,6 +33,8 @@ import com.adaptris.core.MetadataElement;
 import com.adaptris.core.util.Args;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Service to append multiple metadata keys together to form a new key.
@@ -56,6 +61,14 @@ public class MetadataAppenderService extends MetadataServiceImpl {
   @AffectsMetadata
   private String resultKey;
 
+  public static final String DEFAULT_SEPARATOR = "";
+  @NotNull
+  @AutoPopulated
+  @AffectsMetadata
+  @Getter
+  @Setter
+  private String separator = DEFAULT_SEPARATOR;
+
   /**
    * <p>
    * Creates a new instance.  Default key for result metatadata is
@@ -69,13 +82,11 @@ public class MetadataAppenderService extends MetadataServiceImpl {
 
   @Override
   public void doService(AdaptrisMessage msg) {
-    StringBuffer result = new StringBuffer();
-    for (String key : appendKeys) {
-      if (msg.getMetadataValue(key) != null) {
-        result.append(msg.getMetadataValue(key));
-      }
-    }
-    MetadataElement e = new MetadataElement(resultKey, result.toString());
+    String result = appendKeys.stream()
+            .map(key -> msg.getMetadataValue(key))
+            .filter(Objects::nonNull)
+            .collect(Collectors.joining(separator));
+    MetadataElement e = new MetadataElement(resultKey, result);
     logMetadata("Added {}", e);
     msg.addMetadata(e);
   }
@@ -138,5 +149,12 @@ public class MetadataAppenderService extends MetadataServiceImpl {
   public void setResultKey(String string) {
     resultKey = Args.notBlank(string, "resultKey");
   }
+
+
+  /**
+   * Sets the separator to be used between concatenated metadata values
+   * @param string the separator between concatenated metadata values, may not be null
+   */
+  public void setSeparator(String string) { separator = Args.notNull(string, "separator"); }
 
 }
