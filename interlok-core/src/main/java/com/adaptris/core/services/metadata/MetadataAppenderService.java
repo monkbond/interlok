@@ -28,6 +28,7 @@ import com.adaptris.annotation.AffectsMetadata;
 import com.adaptris.annotation.AutoPopulated;
 import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.annotation.DisplayOrder;
+import com.adaptris.annotation.InputFieldDefault;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.MetadataElement;
 import com.adaptris.core.util.Args;
@@ -65,6 +66,7 @@ public class MetadataAppenderService extends MetadataServiceImpl {
   @NotNull
   @AutoPopulated
   @AffectsMetadata
+  @InputFieldDefault("")
   @Getter
   @Setter
   private String separator = DEFAULT_SEPARATOR;
