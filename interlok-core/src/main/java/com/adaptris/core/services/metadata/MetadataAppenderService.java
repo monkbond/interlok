@@ -29,6 +29,7 @@ import com.adaptris.annotation.AutoPopulated;
 import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.annotation.InputFieldDefault;
+import com.adaptris.annotation.InputFieldHint;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.MetadataElement;
 import com.adaptris.core.util.Args;
@@ -63,11 +64,11 @@ public class MetadataAppenderService extends MetadataServiceImpl {
   private String resultKey;
 
   public static final String DEFAULT_SEPARATOR = "";
-  @NotNull
+
   @AutoPopulated
   @AffectsMetadata
+  @InputFieldHint(style="BLANKABLE")
   @InputFieldDefault("")
-  @Getter
   @Setter
   private String separator = DEFAULT_SEPARATOR;
 
@@ -87,7 +88,7 @@ public class MetadataAppenderService extends MetadataServiceImpl {
     String result = appendKeys.stream()
             .map(key -> msg.getMetadataValue(key))
             .filter(Objects::nonNull)
-            .collect(Collectors.joining(separator));
+            .collect(Collectors.joining(getSeparator()));
     MetadataElement e = new MetadataElement(resultKey, result);
     logMetadata("Added {}", e);
     msg.addMetadata(e);
@@ -152,11 +153,11 @@ public class MetadataAppenderService extends MetadataServiceImpl {
     resultKey = Args.notBlank(string, "resultKey");
   }
 
-
   /**
-   * Sets the separator to be used between concatenated metadata values
-   * @param string the separator between concatenated metadata values, may not be null
+   * Gets the separator to be used between concatenated metadata values, returning the default
+   * if null
+   * @return separator, or default if null
    */
-  public void setSeparator(String string) { separator = Args.notNull(string, "separator"); }
+  public String getSeparator() { return separator == null ? DEFAULT_SEPARATOR : separator; }
 
 }

@@ -153,6 +153,12 @@ public class MetadataAppenderServiceTest extends MetadataServiceExample {
     assertEquals(expected, msg.getMetadataValue(resultKey));
   }
 
+  @Test
+  public void testNullSeparator() throws CoreException {
+    service.setSeparator(null);
+    assertEquals(MetadataAppenderService.DEFAULT_SEPARATOR, service.getSeparator());
+  }
+
   static Stream<Arguments> testSeparatorProvider() {
     return Stream.of(
             Arguments.of((Object) new String[]{"key1", "val1"}),
