@@ -29,6 +29,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.LinkedList;
 import java.util.List;
@@ -162,14 +163,18 @@ public class ConfigurableEventHandler extends DefaultEventHandler {
     boolean matches(Event event);
   }
 
+  /**
+   * Matches based on supplied regex
+   */
   @XStreamAlias("regex-event-matcher")
   static class RegexEventMatcher implements EventMatcher {
     @NotNull
+    @NotBlank
     private String regex;
     @NotNull
     private Set<MatchType> matchTypes;
 
-    private transient  Pattern compiledRegex;
+    private transient Pattern compiledRegex;
 
     public RegexEventMatcher(String regex, Set<MatchType> matchTypes) {
       this.regex = regex;
@@ -189,7 +194,9 @@ public class ConfigurableEventHandler extends DefaultEventHandler {
   @XStreamAlias("rule")
   @AllArgsConstructor
   static class Rule {
+    @NotNull
     private EventMatcher matcher;
+    @NotNull
     private StandaloneProducer standaloneProducer;
   }
 }
