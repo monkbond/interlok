@@ -21,7 +21,7 @@ import com.adaptris.interlok.types.InterlokMessage;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 /**
- * Wraps a metadata value as a byte[]
+ * Wraps a metadata value as a bytes[]
  * 
  * @config byte-array-from-metadata
  */
