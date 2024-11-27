@@ -196,13 +196,13 @@ public class ConfigurableEventHandlerTest
   @Test
   public void testEventMatcher() throws Exception {
     Event e = EventFactory.create(AdapterCloseEvent.class);
-    assertEquals(e.getClass().getCanonicalName(), ConfigurableEventHandler.EventMatcher.MatchType.TYPE.getProperty(e));
-    assertEquals(e.getSourceId(), ConfigurableEventHandler.EventMatcher.MatchType.SOURCE_ID.getProperty(e));
-    assertEquals(e.getDestinationId(), ConfigurableEventHandler.EventMatcher.MatchType.DESTINATION_ID.getProperty(e));
-    assertEquals(e.getNameSpace(), ConfigurableEventHandler.EventMatcher.MatchType.NAMESPACE.getProperty(e));
+    assertEquals(e.getClass().getCanonicalName(), EventMatcher.EventMatchType.TYPE.getProperty(e));
+    assertEquals(e.getSourceId(), EventMatcher.EventMatchType.SOURCE_ID.getProperty(e));
+    assertEquals(e.getDestinationId(), EventMatcher.EventMatchType.DESTINATION_ID.getProperty(e));
+    assertEquals(e.getNameSpace(), EventMatcher.EventMatchType.NAMESPACE.getProperty(e));
   }
 
-    @Test
+  @Test
   public void testResolveEventSender() throws Exception {
     Event e = EventFactory.create(AdapterCloseEvent.class);
     ConfigurableEventHandler eh = applyConfiguration(newEventHandler("testResolveEventSender"));
@@ -214,9 +214,9 @@ public class ConfigurableEventHandlerTest
     // add a non matching rule
     eh.getRules().add(
             new ConfigurableEventHandler.Rule(
-                    new ConfigurableEventHandler.RegexEventMatcher(
+                    new RegexEventMatcher(
                             "com.adaptris.core.event.AdapterCloseEvent1",
-                            Set.of(ConfigurableEventHandler.EventMatcher.MatchType.TYPE)
+                            Set.of(EventMatcher.EventMatchType.TYPE.name())
                     ),
                     p1
             )
@@ -226,9 +226,9 @@ public class ConfigurableEventHandlerTest
     StandaloneProducer p2 = new StandaloneProducer();
     eh.getRules().add(
             new ConfigurableEventHandler.Rule(
-                    new ConfigurableEventHandler.RegexEventMatcher(
+                    new RegexEventMatcher(
                             "com.adaptris.core.event.AdapterCloseEvent",
-                            Set.of(ConfigurableEventHandler.EventMatcher.MatchType.TYPE)
+                            Set.of(EventMatcher.EventMatchType.TYPE.name())
                     ),
                     p2
             )
@@ -239,9 +239,9 @@ public class ConfigurableEventHandlerTest
     StandaloneProducer p3 = new StandaloneProducer();
     eh.getRules().add(0,
             new ConfigurableEventHandler.Rule(
-                    new ConfigurableEventHandler.RegexEventMatcher(
+                    new RegexEventMatcher(
                             "com.adaptris.core.event.*",
-                            Set.of(ConfigurableEventHandler.EventMatcher.MatchType.TYPE)
+                            Set.of(EventMatcher.EventMatchType.TYPE.name())
                     ),
                     p3
             )
@@ -256,9 +256,9 @@ public class ConfigurableEventHandlerTest
     StandaloneProducer p4 = new StandaloneProducer();
     eh.getRules().add(
             new ConfigurableEventHandler.Rule(
-                    new ConfigurableEventHandler.RegexEventMatcher(
+                    new RegexEventMatcher(
                             e1.getNameSpace(),
-                            Set.of(ConfigurableEventHandler.EventMatcher.MatchType.TYPE, ConfigurableEventHandler.EventMatcher.MatchType.NAMESPACE)
+                            Set.of(EventMatcher.EventMatchType.TYPE.name(), EventMatcher.EventMatchType.NAMESPACE.name())
                     ),
                     p4
             )

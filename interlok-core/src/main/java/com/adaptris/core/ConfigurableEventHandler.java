@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Adaptris Ltd.
+ * Copyright 2024 Adaptris Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,25 +19,17 @@ package com.adaptris.core;
 import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.AutoPopulated;
 import com.adaptris.annotation.ComponentProfile;
-import com.adaptris.annotation.InputFieldDefault;
-import com.adaptris.annotation.InputFieldHint;
-import com.adaptris.core.util.Args;
-import com.adaptris.core.util.LifecycleHelper;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * <p>
@@ -52,7 +44,7 @@ import java.util.regex.Pattern;
  */
 @XStreamAlias("configurable-event-handler")
 @AdapterComponent
-@ComponentProfile(summary = "Sends MessageLifecycleEvents to a destination based on the matching rule, or default if no match", tag = "base,events")
+@ComponentProfile(summary = "Sends Events to a destination based on the matching rule, or default if no match", tag = "base,events")
 public class ConfigurableEventHandler extends DefaultEventHandler {
 
   @Valid
@@ -60,6 +52,7 @@ public class ConfigurableEventHandler extends DefaultEventHandler {
   @AutoPopulated
   @XStreamImplicit
   @Getter
+  @Setter
   private List<Rule> rules;
 
   public ConfigurableEventHandler() {
@@ -82,8 +75,8 @@ public class ConfigurableEventHandler extends DefaultEventHandler {
    */
   protected AdaptrisMessageSender resolveEventSender(Event event) {
     for (Rule rule : rules) {
-      if (rule.matcher.matches(event)) {
-        return rule.standaloneProducer;
+      if (rule.getMatcher() != null && rule.getMatcher().matches(event)) {
+        return rule.getStandaloneProducer();
       }
     }
     return getProducer();
@@ -100,7 +93,7 @@ public class ConfigurableEventHandler extends DefaultEventHandler {
   protected void eventHandlerInit() throws CoreException {
     super.eventHandlerInit();
     for(Rule rule : rules) {
-      rule.standaloneProducer.init();
+      if (rule.getStandaloneProducer() != null) rule.getStandaloneProducer().init();
     }
   }
 
@@ -109,7 +102,7 @@ public class ConfigurableEventHandler extends DefaultEventHandler {
   protected void eventHandlerStart() throws CoreException {
     super.eventHandlerStart();
     for(Rule rule : rules) {
-      rule.standaloneProducer.start();
+      if (rule.getStandaloneProducer() != null) rule.getStandaloneProducer().start();
     }
   }
 
@@ -118,7 +111,7 @@ public class ConfigurableEventHandler extends DefaultEventHandler {
   protected void eventHandlerStop() {
     super.eventHandlerStop();
     for(Rule rule : rules) {
-      rule.standaloneProducer.stop();
+      if (rule.getStandaloneProducer() != null) rule.getStandaloneProducer().stop();
     }
   }
 
@@ -127,7 +120,7 @@ public class ConfigurableEventHandler extends DefaultEventHandler {
   protected void eventHandlerClose() {
     super.eventHandlerClose();
     for(Rule rule : rules) {
-      rule.standaloneProducer.close();
+      if (rule.getStandaloneProducer() != null) rule.getStandaloneProducer().close();
     }
   }
 
@@ -135,68 +128,40 @@ public class ConfigurableEventHandler extends DefaultEventHandler {
   public void prepare() throws CoreException {
     super.prepare();
     for(Rule rule : rules) {
-      rule.standaloneProducer.prepare();
+      if (rule.getStandaloneProducer() != null) rule.getStandaloneProducer().prepare();
     }
   }
 
 
-  /**
-   * Matches on an event
-   */
-  interface EventMatcher {
-    enum MatchType {
-      SOURCE_ID(event -> event.getSourceId()),
-      DESTINATION_ID(event -> event.getDestinationId()),
-      NAMESPACE(event -> event.getNameSpace()),
-      TYPE(event -> event.getClass().getCanonicalName());
-
-      Function<Event, Object> getter;
-      MatchType(Function<Event, Object> getter) {
-        this.getter = getter;
-      }
-
-      public Object getProperty(Event event) {
-        return getter.apply(event);
-      }
-    }
-
-    boolean matches(Event event);
-  }
-
-  /**
-   * Matches based on supplied regex
-   */
-  @XStreamAlias("regex-event-matcher")
-  static class RegexEventMatcher implements EventMatcher {
-    @NotNull
-    @NotBlank
-    private String regex;
-    @NotNull
-    private Set<MatchType> matchTypes;
-
-    private transient Pattern compiledRegex;
-
-    public RegexEventMatcher(String regex, Set<MatchType> matchTypes) {
-      this.regex = regex;
-      this.matchTypes = matchTypes;
-      this.compiledRegex = Pattern.compile(regex);
-    }
-
-    @Override
-    public boolean matches(Event event) {
-      for (MatchType matchType : matchTypes) {
-        if (compiledRegex.matcher((String)matchType.getProperty(event)).matches()) return true;
-      }
-      return false;
-    }
-  }
-
-  @XStreamAlias("rule")
   @AllArgsConstructor
-  static class Rule {
-    @NotNull
-    private EventMatcher matcher;
-    @NotNull
-    private StandaloneProducer standaloneProducer;
+  @AdapterComponent
+  @XStreamAlias("rule")
+  @ComponentProfile(summary = "Combination of a matcher to match events and a standalone producer for the destination", tag = "events")
+  public static class Rule {
+
+      private EventMatcher matcher;
+
+      private StandaloneProducer standaloneProducer;
+
+      public Rule() {
+          matcher = new NullEventMatcher();
+          standaloneProducer = new StandaloneProducer();
+      }
+
+      public EventMatcher getMatcher() {
+          return matcher;
+      }
+
+      public void setMatcher(EventMatcher matcher) {
+          this.matcher = matcher;
+      }
+
+      public StandaloneProducer getStandaloneProducer() {
+          return standaloneProducer;
+      }
+
+      public void setStandaloneProducer(StandaloneProducer standaloneProducer) {
+          this.standaloneProducer = standaloneProducer;
+      }
   }
 }
