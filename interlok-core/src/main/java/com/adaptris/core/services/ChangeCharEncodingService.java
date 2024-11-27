@@ -68,7 +68,9 @@ public class ChangeCharEncodingService extends ServiceImp {
   public void doService(AdaptrisMessage msg) throws ServiceException {
     String charEncoding = getCharEncoding();
     //Check and evaluate if character encoding is an expression
-    if(StringUtils.isNotEmpty(charEncoding) && InputFieldExpression.isExpression(charEncoding)) {
+    if(charEncoding != null && charEncoding != "") {
+      charEncoding = msg.resolve(charEncoding);
+    } else if(charEncoding != null && InputFieldExpression.isExpression(charEncoding)) {
       charEncoding = msg.resolve(charEncoding);
     }
     msg.setContentEncoding(charEncoding);

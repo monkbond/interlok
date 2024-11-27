@@ -59,10 +59,11 @@ public class ChangeCharEncodingServiceTest extends GeneralServiceExample {
   public void testSetCharEncodingExpression() throws Exception {
     ChangeCharEncodingService srv = new ChangeCharEncodingService();
     assertNull(srv.getCharEncoding());
-    srv.setCharEncoding("%message{pn.processing.worker.transform.encoding-target}");
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("Hello");
-    assertEquals(null, msg.getCharEncoding());
     msg.addMetadata("pn.processing.worker.transform.encoding-target", "UTF-8");
+    execute(srv, msg);
+    assertNull(msg.getCharEncoding());
+    srv.setCharEncoding("%message{pn.processing.worker.transform.encoding-target}");
     execute(srv, msg);
     assertEquals("UTF-8", msg.getCharEncoding());
     srv.setCharEncoding("iso-8859-1");
