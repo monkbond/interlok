@@ -24,6 +24,7 @@ import com.adaptris.core.stubs.FailFirstMockMessageProducer;
 import com.adaptris.core.stubs.MockMessageProducer;
 import com.adaptris.core.util.LifecycleHelper;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.util.Set;
 import java.util.UUID;
@@ -267,9 +268,45 @@ public class ConfigurableEventHandlerTest
 
   }
 
-  /**
-   * @see ExampleConfigCase#retrieveObjectForSampleConfig()
-   */
+  @Test
+  public void testComponentStates() throws Exception {
+    ConfigurableEventHandler evh = applyConfiguration(newEventHandler("testResolveEventSender"));
+    evh.getRules().add(new ConfigurableEventHandler.Rule(
+            Mockito.mock(EventMatcher.class),
+            Mockito.mock(StandaloneProducer.class)
+    ));
+    evh.getRules().add(new ConfigurableEventHandler.Rule(
+            Mockito.mock(EventMatcher.class),
+            Mockito.mock(StandaloneProducer.class)
+    ));
+
+    try {
+      LifecycleHelper.init(evh);
+      LifecycleHelper.prepare(evh);
+      LifecycleHelper.start(evh);
+      LifecycleHelper.stop(evh);
+      evh.getRules().forEach(rule -> {
+        try {
+          Mockito.verify(rule.getStandaloneProducer()).init();
+          Mockito.verify(rule.getStandaloneProducer()).prepare();
+          Mockito.verify(rule.getStandaloneProducer()).start();
+          Mockito.verify(rule.getStandaloneProducer()).stop();
+        } catch (CoreException e) {
+          throw new RuntimeException(e);
+        }
+      });
+    }
+    finally {
+      LifecycleHelper.close(evh);
+      evh.getRules().forEach(rule -> {
+        Mockito.verify(rule.getStandaloneProducer()).close();
+      });
+    }
+  }
+
+    /**
+     * @see ExampleConfigCase#retrieveObjectForSampleConfig()
+     */
   @Override
   protected Object retrieveObjectForSampleConfig() {
     Adapter result = null;
