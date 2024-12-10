@@ -14,6 +14,8 @@ import org.eclipse.jetty.util.security.Constraint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.adaptris.annotation.AdapterComponent;
+import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.annotation.InputFieldHint;
 import com.adaptris.core.management.webserver.SecurityHandlerWrapper;
@@ -28,6 +30,8 @@ import lombok.Setter;
  * Jetty Security Handler Wrapper which allows works with API keys.
  */
 @XStreamAlias("jetty-configurable-key-security-handler")
+@AdapterComponent
+@ComponentProfile(summary = "Jetty Security Handler Wrapper which allows works with API keys.", tag = "jetty,security", since = "5.0.4")
 @DisplayOrder(order = { "apiKeyHeader", "apiKey", "paths" })
 public class ConfigurableKeySecurityHandler implements SecurityHandlerWrapper {
 
