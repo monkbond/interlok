@@ -54,8 +54,6 @@ public abstract class FsHelper {
       return createFileReference(createUrlFromString(s, true));
     } catch (IllegalArgumentException e) {
       // Catch it from createUrlFromString(), since it's probably c:/file.
-      // strip out any uri scheme
-      s = s.replaceFirst("file://", "");
       return new File(s);
     }
   }
