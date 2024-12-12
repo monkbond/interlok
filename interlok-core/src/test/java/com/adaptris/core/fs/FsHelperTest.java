@@ -121,8 +121,11 @@ public class FsHelperTest extends FsHelper {
     File f5 = FsHelper.toFile("./build.gradle");
     assertEquals("build.gradle", f4.getName());
     // will be "."
-    assertNotNull(f4.getParentFile());
-    assertNull(f4.getParentFile().getParentFile());
+    assertNotNull(f5.getParentFile());
+    assertNull(f5.getParentFile().getParentFile());
+
+    File f6 = FsHelper.toFile("http://localhost/./fred");
+    assertEquals("fred", f6.getName());
   }
 
 
