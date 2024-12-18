@@ -18,6 +18,7 @@ package com.adaptris.security.password;
 
 import static com.adaptris.security.password.Password.SEEDED_BATCH;
 
+import com.adaptris.core.fs.FsHelper;
 import com.adaptris.security.exc.PasswordException;
 import com.adaptris.util.text.Base64ByteTranslator;
 import com.adaptris.util.text.HexStringByteTranslator;
@@ -155,7 +156,7 @@ public class SeededAesPbeCrypto extends PasswordImpl {
     if (!p.containsKey(key)) {
       throw new Exception("No Seed file defined in system properties '" + key + "'");
     }
-    if (!new File(p.getProperty(key)).exists()) {
+    if (!FsHelper.toFile(p.getProperty(key), new File(p.getProperty(key))).exists()) {
       throw new Exception("Seed file does not exist");
     }
     return p.getProperty(key);
