@@ -90,7 +90,7 @@ public class XpathMessageSplitter extends MessageSplitterImp {
   @AdvancedConfig(rare = true)
   private DocumentBuilderFactoryBuilder xmlDocumentFactoryConfig;
   @AdvancedConfig(rare = true)
-  private boolean retainBranchNodes = false;
+  private Boolean retainBranchNodes = null;
 
   public XpathMessageSplitter() {
     this(null, null);
@@ -193,14 +193,14 @@ public class XpathMessageSplitter extends MessageSplitterImp {
   }
 
   public boolean isRetainBranchNodes() {
-    return retainBranchNodes;
+    return Boolean.TRUE.equals(retainBranchNodes);
   }
 
   /**
    * Sets whether to retain the branch nodes
    * @param retainBranchNodes
    */
-  public void setRetainBranchNodes(boolean retainBranchNodes) {
+  public void setRetainBranchNodes(Boolean retainBranchNodes) {
     this.retainBranchNodes = retainBranchNodes;
   }
 
@@ -261,12 +261,20 @@ public class XpathMessageSplitter extends MessageSplitterImp {
             created = document.createElement(curr.getNodeName());
           }
           if (prev != null) {
-            for (Node prevSibling = curr.getPreviousSibling(); prevSibling != null; prevSibling = prevSibling.getPreviousSibling()) {
-              prev.appendChild(document.importNode(prevSibling, true));
+            if (!curr.equals(node)) {
+              for (Node prevSibling = curr.getPreviousSibling(); prevSibling != null; prevSibling = prevSibling.getPreviousSibling()) {
+                if (prevSibling.getNodeType() == Node.ELEMENT_NODE) {
+                  prev.appendChild(document.importNode(prevSibling, true));
+                }
+              }
             }
             prev.appendChild(created);
-            for (Node nextSibling = curr.getNextSibling(); nextSibling != null; nextSibling = nextSibling.getNextSibling()) {
-              prev.appendChild(document.importNode(nextSibling, true));
+            if (!curr.equals(node)) {
+              for (Node nextSibling = curr.getNextSibling(); nextSibling != null; nextSibling = nextSibling.getNextSibling()) {
+                if (nextSibling.getNodeType() == Node.ELEMENT_NODE) {
+                  prev.appendChild(document.importNode(nextSibling, true));
+                }
+              }
             }
           } else {
             root = created;

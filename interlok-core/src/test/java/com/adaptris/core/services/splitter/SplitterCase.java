@@ -57,9 +57,9 @@ public abstract class SplitterCase extends SplitterServiceExample {
                 <po>123123</po>
               </header>
               <body>
-                <document>one</document>
-                <document>two</document>
-                <document>three</document>
+                <document>1</document>
+                <document>2</document>
+                <document>3</document>
               </body>
               <trailer>
                 <x>123</x>
