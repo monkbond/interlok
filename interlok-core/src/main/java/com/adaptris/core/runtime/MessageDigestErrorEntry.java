@@ -27,7 +27,6 @@ import java.io.StringWriter;
 import java.util.Date;
 import java.util.Map;
 
-import com.adaptris.core.fs.FsHelper;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -138,7 +137,7 @@ public class MessageDigestErrorEntry extends MessageDigestEntry {
     try {
       if (msg.headersContainsKey(PRODUCED_NAME_KEY)) {
         if (msg.headersContainsKey(FS_PRODUCE_DIRECTORY)) {
-          setFileSystemFile(FsHelper.toFile(msg.getMetadataValue(FS_PRODUCE_DIRECTORY) + File.separator + msg.getMetadataValue(PRODUCED_NAME_KEY), new File(msg.getMetadataValue(FS_PRODUCE_DIRECTORY), msg.getMetadataValue(PRODUCED_NAME_KEY))));
+          setFileSystemFile(new File(msg.getMetadataValue(FS_PRODUCE_DIRECTORY), msg.getMetadataValue(PRODUCED_NAME_KEY)));
         } else {
           setFileSystemPath(msg.getMetadataValue(PRODUCED_NAME_KEY));
         }

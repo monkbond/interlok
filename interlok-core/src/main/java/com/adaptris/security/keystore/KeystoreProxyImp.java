@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyStore;
@@ -32,7 +31,6 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 
-import com.adaptris.core.fs.FsHelper;
 import lombok.Getter;
 import org.bouncycastle.util.io.pem.PemReader;
 import org.slf4j.Logger;
@@ -402,7 +400,7 @@ class KeystoreProxyImp implements KeystoreProxy {
   public void importPrivateKey(String alias, char[] keyPassword, String file,
                                char[] filePassword)
       throws AdaptrisSecurityException {
-    this.importPrivateKey(alias, keyPassword, FsHelper.toFile(file, new File(file)), filePassword);
+    this.importPrivateKey(alias, keyPassword, new File(file), filePassword);
   }
 
   /**

@@ -24,7 +24,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Properties;
 
-import com.adaptris.core.fs.FsHelper;
 import com.adaptris.security.exc.AdaptrisSecurityException;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -62,7 +61,7 @@ final class LocalKeystore extends KeystoreLocationImp {
    * @param s The filename
    */
   public void setKeyStorePath(String s) {
-    keyStorePath = FsHelper.toFile(s, new File(s));
+    keyStorePath = new File(s);
   }
 
   /**
