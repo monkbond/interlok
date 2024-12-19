@@ -28,7 +28,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -192,7 +191,7 @@ public class XpathMessageSplitter extends MessageSplitterImp {
     this.xmlDocumentFactoryConfig = xml;
   }
 
-  public boolean isRetainBranchNodes() {
+  public boolean getRetainBranchNodes() {
     return Boolean.TRUE.equals(retainBranchNodes);
   }
 
@@ -244,7 +243,7 @@ public class XpathMessageSplitter extends MessageSplitterImp {
      */
     private Node buildRootNode(Document document, Node node) {
       Node root = null;
-      if (isRetainBranchNodes()) {
+      if (getRetainBranchNodes()) {
         Node ptr = node;
         List<Node> l = new LinkedList<>();
         while (ptr != null && ptr.getNodeType() == Node.ELEMENT_NODE) {
@@ -292,7 +291,6 @@ public class XpathMessageSplitter extends MessageSplitterImp {
       if (nodeListIndex < nodeList.getLength()) {
         Node e = nodeList.item(nodeListIndex);
         Document splitXmlDoc = docBuilder.newDocument();
-        Node dup = splitXmlDoc.importNode(e, true);
         Node root = buildRootNode(splitXmlDoc, e);
         splitXmlDoc.appendChild(root);
         AdaptrisMessage splitMsg = factory.newMessage("", encoding);

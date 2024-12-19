@@ -182,6 +182,7 @@ public class XpathSplitterTest extends SplitterCase {
       for (AdaptrisMessage m : closeable) {
         assertFalse(m.getObjectHeaders().containsKey(obj));
         xml.setSource(new ByteArrayInputStream(m.getPayload()));
+        assertEquals(xml.getNodeList("/envelope/body/document").getLength(), 1);
         assertEquals(xml.getSingleNode("/envelope/body/document/text()").getNodeValue(), String.valueOf(count+1));
         assertNotNull(xml.getSingleNode("/envelope/header/po"));
         assertNotNull(xml.getSingleNode("/envelope/trailer/x"));
