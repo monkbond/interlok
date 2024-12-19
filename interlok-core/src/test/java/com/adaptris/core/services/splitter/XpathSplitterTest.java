@@ -168,6 +168,7 @@ public class XpathSplitterTest extends SplitterCase {
     }
     assertEquals(3, count);
 
+    // test with retainBranchNodes = true
     splitter = new XpathMessageSplitter("/envelope/body/document");
     splitter.setRetainBranchNodes(true);
     count = 0;
