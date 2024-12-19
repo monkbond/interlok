@@ -58,6 +58,12 @@ public abstract class FsHelper {
     }
   }
 
+    /**
+     * Attempts to convert the String to a File, and if an exception is encountered, fallback to the provided File.
+     * @param s
+     * @param fallback
+     * @return
+     */
   public static File toFile(String s, File fallback) {
     try {
       return toFile(s);
