@@ -27,6 +27,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -54,6 +55,20 @@ public abstract class FsHelper {
       return createFileReference(createUrlFromString(s, true));
     } catch (IllegalArgumentException e) {
       return new File(s);
+    }
+  }
+
+    /**
+     * Attempts to convert the String to a File, and if an exception is encountered, fallback to the provided File.
+     * @param s
+     * @param fallback
+     * @return
+     */
+  public static File toFile(String s, File fallback) {
+    try {
+      return toFile(s);
+    } catch (Exception e) {
+      return fallback;
     }
   }
 
@@ -89,6 +104,31 @@ public abstract class FsHelper {
     return new File(filename);
   }
 
+  public static URI createUriFromString(String s, boolean backslashConvert) throws URISyntaxException {
+    String destToConvert = backslashConvert ? backslashToSlash(s) : s;
+    URI configuredUri = null;
+    try {
+      configuredUri = new URI(destToConvert);
+    }
+    catch (URISyntaxException e) {
+      // Specifically here to cope with file:///c:/ (which is
+      // technically illegal according to RFC2396 but we need
+      // to support it
+      if (destToConvert.split(":").length >= 3) {
+        try {
+          configuredUri = new URI(URLEncoder.encode(destToConvert, "UTF-8"));
+        } catch (UnsupportedEncodingException ex) {
+          configuredUri = new URI(URLEncoder.encode(destToConvert, Charset.defaultCharset()));
+        }
+
+      }
+      else {
+        throw e;
+      }
+    }
+    return configuredUri;
+  }
+
   /**
    * Creates a {@link URL} based on the passed destination.
    * <p>
@@ -109,22 +149,7 @@ public abstract class FsHelper {
    *
    */
   public static URL createUrlFromString(String s, boolean backslashConvert) throws IOException, URISyntaxException {
-    String destToConvert = backslashConvert ? backslashToSlash(s) : s;
-    URI configuredUri = null;
-    try {
-      configuredUri = new URI(destToConvert);
-    }
-    catch (URISyntaxException e) {
-      // Specifically here to cope with file:///c:/ (which is
-      // technically illegal according to RFC2396 but we need
-      // to support it
-      if (destToConvert.split(":").length >= 3) {
-        configuredUri = new URI(URLEncoder.encode(destToConvert, "UTF-8"));
-      }
-      else {
-        throw e;
-      }
-    }
+    URI configuredUri = createUriFromString(s, backslashConvert);
     String scheme = configuredUri.getScheme();
 
     if ("file".equals(scheme)) {
